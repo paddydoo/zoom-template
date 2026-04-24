@@ -41,6 +41,7 @@ export default function App() {
   const [isExporting, setIsExporting] = useState(false);
   const [exportProgress, setExportProgress] = useState(0);
   const isExportingRef = useRef(false);
+  const currentTimeRef = useRef(0);
   const canvasRef = useRef(null);
   const mediaRecorderRef = useRef(null);
   const recordedChunks = useRef([]);
@@ -171,6 +172,7 @@ export default function App() {
     const maxTime = getMaxMediaTime();
     if (maxTime === 0) return;
 
+    currentTimeRef.current = 0;
     setCurrentTime(0);
     setIsExporting(true);
     setExportProgress(0);
@@ -238,14 +240,13 @@ export default function App() {
         ctx.beginPath();
         ctx.roundRect(x, y, w, h, 32);
         ctx.clip();
-        
-        if (isImage) {
-           drawContain(ctx, mediaEl, x, y, w, h);
-        } else {
-           if (mediaEl.readyState >= 2) {
-             drawCover(ctx, mediaEl, x, y, w, h);
-           }
-        }
+        try {
+          if (isImage) {
+            drawContain(ctx, mediaEl, x, y, w, h);
+          } else {
+            drawCover(ctx, mediaEl, x, y, w, h);
+          }
+        } catch (e) {}
         ctx.restore();
       }
 
@@ -280,6 +281,7 @@ export default function App() {
     const maxTime = getMaxMediaTime();
     if (maxTime === 0) return;
     if (!isPlaying && currentTime >= maxTime) {
+      currentTimeRef.current = 0;
       setCurrentTime(0);
     }
     setIsPlaying(!isPlaying);
@@ -290,34 +292,36 @@ export default function App() {
     let lastTime = performance.now();
 
     const loop = (time) => {
-      const delta = (time - lastTime) / 1000; 
+      const delta = (time - lastTime) / 1000;
       lastTime = time;
 
-      setCurrentTime((prev) => {
-        const maxTime = getMaxMediaTime();
-        const nextTime = prev + delta;
-        
+      const maxTime = getMaxMediaTime();
+      const nextTime = currentTimeRef.current + delta;
+
+      if (isExportingRef.current) {
+        renderCanvasFrame(nextTime);
+        setExportProgress(Math.min(100, Math.round((nextTime / maxTime) * 100)));
+      }
+
+      if (nextTime >= maxTime && maxTime > 0) {
+        currentTimeRef.current = maxTime;
+        setCurrentTime(maxTime);
         if (isExportingRef.current) {
-           renderCanvasFrame(nextTime);
-           setExportProgress(Math.min(100, Math.round((nextTime / maxTime) * 100)));
+          mediaRecorderRef.current?.stop();
         }
+        setIsPlaying(false);
+        return;
+      }
 
-        if (nextTime >= maxTime && maxTime > 0) {
-          if (isExportingRef.current) {
-             mediaRecorderRef.current?.stop();
-             setIsPlaying(false);
-          } else {
-             setIsPlaying(false);
-          }
-          return maxTime;
-        }
+      if (nextTime >= duration) {
+        currentTimeRef.current = duration;
+        setCurrentTime(duration);
+        setIsPlaying(false);
+        return;
+      }
 
-        if (nextTime >= duration) {
-          setIsPlaying(false);
-          return duration; 
-        }
-        return nextTime;
-      });
+      currentTimeRef.current = nextTime;
+      setCurrentTime(nextTime);
 
       if (isPlaying) {
         animationFrameId = requestAnimationFrame(loop);
@@ -348,7 +352,9 @@ export default function App() {
     
     let percentage = x / trackWidth;
     percentage = Math.max(0, Math.min(1, percentage));
-    setCurrentTime(percentage * duration);
+    const t = percentage * duration;
+    currentTimeRef.current = t;
+    setCurrentTime(t);
   };
 
   const handleTimelineMouseDown = (e) => {
