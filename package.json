@@ -6,12 +6,16 @@
   "scripts": {
     "dev": "vite",
     "build": "vite build",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "studio": "remotion studio src/remotion/index.ts",
+    "render": "remotion render src/remotion/index.ts ZoomLayout --props=input-props.json --codec=h264 out/output.mp4"
   },
   "dependencies": {
+    "@remotion/cli": "^4.0.451",
     "lucide-react": "^0.468.0",
     "react": "^18.3.1",
-    "react-dom": "^18.3.1"
+    "react-dom": "^18.3.1",
+    "remotion": "^4.0.451"
   },
   "devDependencies": {
     "@vitejs/plugin-react": "^4.3.4",
