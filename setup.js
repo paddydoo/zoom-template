@@ -177,12 +177,13 @@ button:disabled{opacity:.35;cursor:not-allowed}
 </div>
 <script>
 fetch('/props').then(r=>r.json()).then(p=>{
-  if(p.speaker1){document.getElementById('n1').value=p.speaker1.name||'';document.getElementById('t1').value=(p.speaker1.trimStart||0)/30;if(p.speaker1.src)document.getElementById('fn1').textContent=p.speaker1.src;}
-  if(p.speaker2){document.getElementById('n2').value=p.speaker2.name||'';document.getElementById('t2').value=(p.speaker2.trimStart||0)/30;if(p.speaker2.src)document.getElementById('fn2').textContent=p.speaker2.src;}
-  if(p.logo){document.getElementById('nl').value=p.logo.name||'';if(p.logo.src)document.getElementById('fnl').textContent=p.logo.src;}
+  if(p.speaker1){document.getElementById('n1').value=p.speaker1.name||'';document.getElementById('t1').value=(p.speaker1.trimStart||0)/30;if(p.speaker1.src){SLOT_SRC.speaker1=p.speaker1.src;document.getElementById('fn1').textContent=p.speaker1.src;}}
+  if(p.speaker2){document.getElementById('n2').value=p.speaker2.name||'';document.getElementById('t2').value=(p.speaker2.trimStart||0)/30;if(p.speaker2.src){SLOT_SRC.speaker2=p.speaker2.src;document.getElementById('fn2').textContent=p.speaker2.src;}}
+  if(p.logo){document.getElementById('nl').value=p.logo.name||'';if(p.logo.src){SLOT_SRC.logo=p.logo.src;document.getElementById('fnl').textContent=p.logo.src;}}
   if(p.durationInSeconds)document.getElementById('dur').value=p.durationInSeconds;
 });
 const SLOT_EL={speaker1:'fn1',speaker2:'fn2',logo:'fnl'};
+const SLOT_SRC={speaker1:'media/speaker1.mp4',speaker2:'media/speaker2.mp4',logo:'media/logo.png'};
 async function upFile(slot,file){
   const el=document.getElementById(SLOT_EL[slot]);
   el.style.color='';
@@ -192,6 +193,7 @@ async function upFile(slot,file){
     const r=await fetch('/upload/'+slot,{method:'POST',body:fd});
     if(!r.ok)throw new Error('Server error '+r.status);
     const{src}=await r.json();
+    SLOT_SRC[slot]=src;
     el.textContent='✓ '+src;
     el.style.color='#4ade80';
   }catch(err){
@@ -212,11 +214,10 @@ document.querySelectorAll('.dz').forEach(d=>{
 async function save(){
   const dur=parseInt(document.getElementById('dur').value)||10;
   const f=dur*30;
-  const g=id=>document.getElementById(id).textContent;
   const props={durationInSeconds:dur,
-    speaker1:{src:g('fn1')||'media/speaker1.mp4',name:document.getElementById('n1').value||'Speaker 1',startFrame:0,durationInFrames:f,trimStart:Math.round(parseFloat(document.getElementById('t1').value||0)*30)},
-    speaker2:{src:g('fn2')||'media/speaker2.mp4',name:document.getElementById('n2').value||'Speaker 2',startFrame:0,durationInFrames:f,trimStart:Math.round(parseFloat(document.getElementById('t2').value||0)*30)},
-    logo:{src:g('fnl')||'media/logo.png',name:document.getElementById('nl').value||'Company Logo',startFrame:0,durationInFrames:f}
+    speaker1:{src:SLOT_SRC.speaker1,name:document.getElementById('n1').value||'Speaker 1',startFrame:0,durationInFrames:f,trimStart:Math.round(parseFloat(document.getElementById('t1').value||0)*30)},
+    speaker2:{src:SLOT_SRC.speaker2,name:document.getElementById('n2').value||'Speaker 2',startFrame:0,durationInFrames:f,trimStart:Math.round(parseFloat(document.getElementById('t2').value||0)*30)},
+    logo:{src:SLOT_SRC.logo,name:document.getElementById('nl').value||'Company Logo',startFrame:0,durationInFrames:f}
   };
   await fetch('/props',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(props)});
   const m=document.getElementById('sm');m.textContent='✓ Saved';m.className='sm ok';
