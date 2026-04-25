@@ -3,6 +3,7 @@ import { Composition } from 'remotion';
 import { ZoomLayout, ZoomLayoutProps } from './ZoomLayout';
 
 const DEFAULT_PROPS: ZoomLayoutProps = {
+  durationInSeconds: 10,
   speaker1: {
     src: 'media/speaker1.mp4',
     name: 'Speaker 1',
@@ -29,10 +30,12 @@ export const Root: React.FC = () => (
   <Composition
     id="ZoomLayout"
     component={ZoomLayout}
-    durationInFrames={300}
     fps={30}
     width={720}
     height={1280}
     defaultProps={DEFAULT_PROPS}
+    calculateMetadata={({ props }) => ({
+      durationInFrames: Math.round((props.durationInSeconds ?? 10) * 30),
+    })}
   />
 );

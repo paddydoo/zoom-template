@@ -1,4 +1,5 @@
 {
+  "durationInSeconds": 10,
   "speaker1": {
     "src": "media/speaker1.mp4",
     "name": "Speaker 1",

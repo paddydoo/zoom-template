@@ -18,6 +18,7 @@ export type ImageClip = {
 };
 
 export type ZoomLayoutProps = {
+  durationInSeconds?: number;
   speaker1: VideoClip;
   speaker2: VideoClip;
   logo: ImageClip;
