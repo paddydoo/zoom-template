@@ -81,7 +81,10 @@ app.get('/render-stream', (req, res) => {
   req.on('close', () => { renderProc?.kill(); renderProc = null; });
 });
 
-app.get('/', (_, res) => res.send(HTML));
+app.get('/', (_, res) => {
+  res.setHeader('Cache-Control', 'no-store');
+  res.send(HTML);
+});
 
 app.listen(PORT, () => {
   const url = `http://localhost:${PORT}`;
@@ -151,19 +154,19 @@ button:disabled{opacity:.35;cursor:not-allowed}
   <div class="slots">
     <div class="card">
       <h3>Speaker 1</h3>
-      <div class="dz" id="dz1" data-slot="speaker1" onclick="document.getElementById('fi1').click()"><input type="file" id="fi1" accept="video/*" onchange="up('speaker1',this)"><div class="ico">🎥</div><div class="hint">Click or drop video</div><div class="fn" id="fn1"></div></div>
+      <div class="dz" id="dz1" data-slot="speaker1"><input type="file" id="fi1" accept="video/*" onchange="up('speaker1',this)"><div class="ico">🎥</div><div class="hint">Click or drop video</div><div class="fn" id="fn1"></div></div>
       <div class="field"><label>Display Name</label><input type="text" id="n1" placeholder="Speaker 1"></div>
       <div class="field"><label>Trim Start (seconds)</label><input type="number" id="t1" value="0" min="0" step="0.1"></div>
     </div>
     <div class="card">
       <h3>Speaker 2</h3>
-      <div class="dz" id="dz2" data-slot="speaker2" onclick="document.getElementById('fi2').click()"><input type="file" id="fi2" accept="video/*" onchange="up('speaker2',this)"><div class="ico">🎥</div><div class="hint">Click or drop video</div><div class="fn" id="fn2"></div></div>
+      <div class="dz" id="dz2" data-slot="speaker2"><input type="file" id="fi2" accept="video/*" onchange="up('speaker2',this)"><div class="ico">🎥</div><div class="hint">Click or drop video</div><div class="fn" id="fn2"></div></div>
       <div class="field"><label>Display Name</label><input type="text" id="n2" placeholder="Speaker 2"></div>
       <div class="field"><label>Trim Start (seconds)</label><input type="number" id="t2" value="0" min="0" step="0.1"></div>
     </div>
     <div class="card">
       <h3>Logo / Brand</h3>
-      <div class="dz" id="dzl" data-slot="logo" onclick="document.getElementById('fil').click()"><input type="file" id="fil" accept="image/*" onchange="up('logo',this)"><div class="ico">🖼️</div><div class="hint">Click or drop image</div><div class="fn" id="fnl"></div></div>
+      <div class="dz" id="dzl" data-slot="logo"><input type="file" id="fil" accept="image/*" onchange="up('logo',this)"><div class="ico">🖼️</div><div class="hint">Click or drop image</div><div class="fn" id="fnl"></div></div>
       <div class="field"><label>Display Name</label><input type="text" id="nl" placeholder="Company Logo"></div>
     </div>
   </div>
@@ -215,6 +218,10 @@ async function upFile(slot,file){
 }
 function up(slot,input){const f=input.files[0];if(f)upFile(slot,f);}
 document.querySelectorAll('.dz').forEach(d=>{
+  d.addEventListener('click',e=>{
+    if(e.target.tagName==='INPUT') return;
+    d.querySelector('input[type=file]').click();
+  });
   d.addEventListener('dragover',e=>{e.preventDefault();d.classList.add('over')});
   d.addEventListener('dragleave',()=>d.classList.remove('over'));
   d.addEventListener('drop',e=>{
