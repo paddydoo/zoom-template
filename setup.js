@@ -96,7 +96,7 @@ header p{font-size:12px;color:#555}
 .card h3{font-size:10px;font-weight:700;color:#555;text-transform:uppercase;letter-spacing:.08em;margin-bottom:12px}
 .dz{border:2px dashed #2a2a2e;border-radius:8px;padding:20px 12px;text-align:center;cursor:pointer;transition:border-color .15s,background .15s;margin-bottom:12px;position:relative;min-height:80px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px}
 .dz:hover,.dz.over{border-color:#3b82f6;background:rgba(59,130,246,.06)}
-.dz input{position:absolute;inset:0;opacity:0;cursor:pointer;width:100%;height:100%}
+.dz input{display:none}
 .dz .ico{font-size:22px}
 .dz .hint{font-size:11px;color:#555}
 .dz .fn{font-size:11px;color:#3b82f6;font-weight:500;word-break:break-all;padding:0 4px}
@@ -139,19 +139,19 @@ button:disabled{opacity:.35;cursor:not-allowed}
   <div class="slots">
     <div class="card">
       <h3>Speaker 1</h3>
-      <div class="dz" id="dz1"><input type="file" accept="video/*" onchange="up('speaker1',this)"><div class="ico">🎥</div><div class="hint">Click or drop video</div><div class="fn" id="fn1"></div></div>
+      <div class="dz" id="dz1" data-slot="speaker1" onclick="document.getElementById('fi1').click()"><input type="file" id="fi1" accept="video/*" onchange="up('speaker1',this)"><div class="ico">🎥</div><div class="hint">Click or drop video</div><div class="fn" id="fn1"></div></div>
       <div class="field"><label>Display Name</label><input type="text" id="n1" placeholder="Speaker 1"></div>
       <div class="field"><label>Trim Start (seconds)</label><input type="number" id="t1" value="0" min="0" step="0.1"></div>
     </div>
     <div class="card">
       <h3>Speaker 2</h3>
-      <div class="dz" id="dz2"><input type="file" accept="video/*" onchange="up('speaker2',this)"><div class="ico">🎥</div><div class="hint">Click or drop video</div><div class="fn" id="fn2"></div></div>
+      <div class="dz" id="dz2" data-slot="speaker2" onclick="document.getElementById('fi2').click()"><input type="file" id="fi2" accept="video/*" onchange="up('speaker2',this)"><div class="ico">🎥</div><div class="hint">Click or drop video</div><div class="fn" id="fn2"></div></div>
       <div class="field"><label>Display Name</label><input type="text" id="n2" placeholder="Speaker 2"></div>
       <div class="field"><label>Trim Start (seconds)</label><input type="number" id="t2" value="0" min="0" step="0.1"></div>
     </div>
     <div class="card">
       <h3>Logo / Brand</h3>
-      <div class="dz" id="dzl"><input type="file" accept="image/*" onchange="up('logo',this)"><div class="ico">🖼️</div><div class="hint">Click or drop image</div><div class="fn" id="fnl"></div></div>
+      <div class="dz" id="dzl" data-slot="logo" onclick="document.getElementById('fil').click()"><input type="file" id="fil" accept="image/*" onchange="up('logo',this)"><div class="ico">🖼️</div><div class="hint">Click or drop image</div><div class="fn" id="fnl"></div></div>
       <div class="field"><label>Display Name</label><input type="text" id="nl" placeholder="Company Logo"></div>
     </div>
   </div>
@@ -182,19 +182,32 @@ fetch('/props').then(r=>r.json()).then(p=>{
   if(p.logo){document.getElementById('nl').value=p.logo.name||'';if(p.logo.src)document.getElementById('fnl').textContent=p.logo.src;}
   if(p.durationInSeconds)document.getElementById('dur').value=p.durationInSeconds;
 });
-async function up(slot,input){
-  const file=input.files[0];if(!file)return;
-  const ids={speaker1:'fn1',speaker2:'fn2',logo:'fnl'};
-  const el=document.getElementById(ids[slot]);
+const SLOT_EL={speaker1:'fn1',speaker2:'fn2',logo:'fnl'};
+async function upFile(slot,file){
+  const el=document.getElementById(SLOT_EL[slot]);
+  el.style.color='';
   el.textContent='Uploading…';
-  const fd=new FormData();fd.append('file',file);
-  const {src}=await(await fetch('/upload/'+slot,{method:'POST',body:fd})).json();
-  el.textContent=src;
+  try{
+    const fd=new FormData();fd.append('file',file);
+    const r=await fetch('/upload/'+slot,{method:'POST',body:fd});
+    if(!r.ok)throw new Error('Server error '+r.status);
+    const{src}=await r.json();
+    el.textContent='✓ '+src;
+    el.style.color='#4ade80';
+  }catch(err){
+    el.textContent='❌ '+err.message;
+    el.style.color='#f87171';
+  }
 }
+function up(slot,input){const f=input.files[0];if(f)upFile(slot,f);}
 document.querySelectorAll('.dz').forEach(d=>{
   d.addEventListener('dragover',e=>{e.preventDefault();d.classList.add('over')});
   d.addEventListener('dragleave',()=>d.classList.remove('over'));
-  d.addEventListener('drop',()=>d.classList.remove('over'));
+  d.addEventListener('drop',e=>{
+    e.preventDefault();d.classList.remove('over');
+    const f=e.dataTransfer.files[0];
+    if(f)upFile(d.dataset.slot,f);
+  });
 });
 async function save(){
   const dur=parseInt(document.getElementById('dur').value)||10;
