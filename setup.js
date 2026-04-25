@@ -23,6 +23,12 @@ const storage = multer.diskStorage({
 const upload = multer({ storage });
 
 app.post('/upload/:slot', upload.single('file'), (req, res) => {
+  if (!req.file) {
+    console.log(`[upload] ${req.params.slot}: NO FILE in request`);
+    return res.status(400).json({ error: 'No file received' });
+  }
+  const exists = existsSync(req.file.path);
+  console.log(`[upload] ${req.params.slot}: ${req.file.originalname} (${req.file.size} bytes) → ${req.file.path} (exists: ${exists})`);
   res.json({ src: `media/${req.file.filename}` });
 });
 
@@ -33,7 +39,13 @@ app.get('/props', (_, res) => {
 
 app.post('/props', (req, res) => {
   writeFileSync(join(__dirname, 'input-props.json'), JSON.stringify(req.body, null, 2));
+  console.log(`[props] saved: ${JSON.stringify(req.body, null, 2)}`);
   res.json({ ok: true });
+});
+
+app.use((err, req, res, next) => {
+  console.error('[error]', err.message);
+  res.status(500).json({ error: err.message });
 });
 
 app.post('/open-output', (_, res) => {
