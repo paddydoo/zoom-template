@@ -135,7 +135,7 @@ const seededRand = (seed: number) => {
   };
 };
 
-const Backdrop: React.FC = () => {
+export const Backdrop: React.FC = () => {
   const rand = seededRand(7);
   const items: React.ReactNode[] = [];
   const cols = 7;

@@ -1,6 +1,12 @@
 import React from 'react';
-import { Composition } from 'remotion';
-import { ZoomLayout, ZoomLayoutProps } from './ZoomLayout';
+import { AbsoluteFill, Composition } from 'remotion';
+import { Backdrop, ZoomLayout, ZoomLayoutProps } from './ZoomLayout';
+
+const BackdropOnly: React.FC = () => (
+  <AbsoluteFill style={{ backgroundColor: '#000000' }}>
+    <Backdrop />
+  </AbsoluteFill>
+);
 
 const DEFAULT_PROPS: ZoomLayoutProps = {
   durationInSeconds: 10,
@@ -27,15 +33,25 @@ const DEFAULT_PROPS: ZoomLayoutProps = {
 };
 
 export const Root: React.FC = () => (
-  <Composition
-    id="ZoomLayout"
-    component={ZoomLayout}
-    fps={30}
-    width={720}
-    height={1280}
-    defaultProps={DEFAULT_PROPS}
-    calculateMetadata={({ props }) => ({
-      durationInFrames: Math.round((props.durationInSeconds ?? 10) * 30),
-    })}
-  />
+  <>
+    <Composition
+      id="ZoomLayout"
+      component={ZoomLayout}
+      fps={30}
+      width={720}
+      height={1280}
+      defaultProps={DEFAULT_PROPS}
+      calculateMetadata={({ props }) => ({
+        durationInFrames: Math.round((props.durationInSeconds ?? 10) * 30),
+      })}
+    />
+    <Composition
+      id="Backdrop"
+      component={BackdropOnly}
+      fps={30}
+      width={720}
+      height={1280}
+      durationInFrames={1}
+    />
+  </>
 );
