@@ -3,7 +3,7 @@ import { AbsoluteFill, Composition } from 'remotion';
 import { Backdrop, ZoomLayout, ZoomLayoutProps } from './ZoomLayout';
 
 const BackdropOnly: React.FC = () => (
-  <AbsoluteFill style={{ backgroundColor: '#000000' }}>
+  <AbsoluteFill style={{ backgroundColor: '#1E3A5F' }}>
     <Backdrop />
   </AbsoluteFill>
 );

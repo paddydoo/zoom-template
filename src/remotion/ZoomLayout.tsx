@@ -2,10 +2,9 @@ import React from 'react';
 import { AbsoluteFill, Img, Sequence, Video, staticFile } from 'remotion';
 import {
   Phone, VideoOff, MicOff, MoreVertical,
-  Heart, Globe, Plane, MessageCircle, MapPin, Coffee, Wine, Calendar,
-  Camera, Music, Star, Sparkles, Smartphone, Gift, Sun, Moon, Compass,
-  Mail, BookOpen, Headphones, Send, Smile, Flower2, Languages, Ticket,
-  Cake, Martini, Anchor, Mountain, Palmtree, Umbrella,
+  Heart, Globe, Plane, MessageCircle, MapPin, Coffee, Wine,
+  Camera, Sparkles, Compass, Mail, Send, Ticket, Martini,
+  Luggage, Flame, MessageCircleHeart, Target, Cherry, Zap,
 } from 'lucide-react';
 
 export type VideoClip = {
@@ -121,10 +120,9 @@ const ImageSlot: React.FC<{ clip: ImageClip; x: number; y: number; w: number; h:
 );
 
 const PATTERN_ICONS = [
-  Heart, Globe, Plane, MessageCircle, MapPin, Coffee, Wine, Calendar,
-  Camera, Music, Star, Sparkles, Smartphone, Gift, Sun, Moon, Compass,
-  Mail, BookOpen, Headphones, Send, Smile, Flower2, Languages, Ticket,
-  Cake, Martini, Anchor, Mountain, Palmtree, Umbrella,
+  Heart, Globe, Plane, MessageCircle, MapPin, Coffee, Wine,
+  Camera, Sparkles, Compass, Mail, Send, Ticket, Martini,
+  Luggage, Flame, MessageCircleHeart, Target, Cherry, Zap,
 ];
 
 const seededRand = (seed: number) => {
@@ -138,19 +136,19 @@ const seededRand = (seed: number) => {
 export const Backdrop: React.FC = () => {
   const rand = seededRand(7);
   const items: React.ReactNode[] = [];
-  const cols = 7;
-  const rows = 13;
+  const cols = 9;
+  const rows = 16;
   const cellW = 720 / cols;
   const cellH = 1280 / rows;
 
   for (let r = 0; r < rows; r++) {
     for (let c = 0; c < cols; c++) {
       const Icon = PATTERN_ICONS[Math.floor(rand() * PATTERN_ICONS.length)];
-      const size = 32 + Math.floor(rand() * 26);
+      const size = 48 + Math.floor(rand() * 32);
       const jx = (rand() - 0.5) * cellW * 0.7;
       const jy = (rand() - 0.5) * cellH * 0.7;
       const rot = Math.round((rand() - 0.5) * 50);
-      const opacity = 0.35 + rand() * 0.4;
+      const opacity = 0.55 + rand() * 0.35;
       const cx = c * cellW + cellW / 2 + jx;
       const cy = r * cellH + cellH / 2 + jy;
       items.push(
@@ -164,7 +162,7 @@ export const Backdrop: React.FC = () => {
             opacity,
           }}
         >
-          <Icon size={size} color="#4a4a4a" strokeWidth={1.5} />
+          <Icon size={size} color="#FED7AA" strokeWidth={1.5} />
         </div>,
       );
     }
@@ -197,7 +195,7 @@ const CallBtn: React.FC<{
 );
 
 export const ZoomLayout: React.FC<ZoomLayoutProps> = ({ speaker1, speaker2, logo }) => (
-  <AbsoluteFill style={{ backgroundColor: '#000000' }}>
+  <AbsoluteFill style={{ backgroundColor: '#1E3A5F' }}>
     <Backdrop />
     <VideoSlot clip={speaker1} x={32} y={160} w={316} h={400} />
     <VideoSlot clip={speaker2} x={372} y={160} w={316} h={400} />
@@ -211,7 +209,7 @@ export const ZoomLayout: React.FC<ZoomLayoutProps> = ({ speaker1, speaker2, logo
         top: 1160,
         width: 720,
         height: 120,
-        backgroundColor: '#000000',
+        backgroundColor: '#1E3A5F',
       }}
     />
 
