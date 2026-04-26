@@ -1,6 +1,12 @@
 import React from 'react';
 import { AbsoluteFill, Img, Sequence, Video, staticFile } from 'remotion';
-import { Phone, VideoOff, MicOff, MoreVertical } from 'lucide-react';
+import {
+  Phone, VideoOff, MicOff, MoreVertical,
+  Heart, Globe, Plane, MessageCircle, MapPin, Coffee, Wine, Calendar,
+  Camera, Music, Star, Sparkles, Smartphone, Gift, Sun, Moon, Compass,
+  Mail, BookOpen, Headphones, Send, Smile, Flower2, Languages, Ticket,
+  Cake, Martini, Anchor, Mountain, Palmtree, Umbrella,
+} from 'lucide-react';
 
 export type VideoClip = {
   src: string;
@@ -114,6 +120,58 @@ const ImageSlot: React.FC<{ clip: ImageClip; x: number; y: number; w: number; h:
   </div>
 );
 
+const PATTERN_ICONS = [
+  Heart, Globe, Plane, MessageCircle, MapPin, Coffee, Wine, Calendar,
+  Camera, Music, Star, Sparkles, Smartphone, Gift, Sun, Moon, Compass,
+  Mail, BookOpen, Headphones, Send, Smile, Flower2, Languages, Ticket,
+  Cake, Martini, Anchor, Mountain, Palmtree, Umbrella,
+];
+
+const seededRand = (seed: number) => {
+  let s = seed;
+  return () => {
+    s = (s * 9301 + 49297) % 233280;
+    return s / 233280;
+  };
+};
+
+const Backdrop: React.FC = () => {
+  const rand = seededRand(7);
+  const items: React.ReactNode[] = [];
+  const cols = 7;
+  const rows = 13;
+  const cellW = 720 / cols;
+  const cellH = 1280 / rows;
+
+  for (let r = 0; r < rows; r++) {
+    for (let c = 0; c < cols; c++) {
+      const Icon = PATTERN_ICONS[Math.floor(rand() * PATTERN_ICONS.length)];
+      const size = 32 + Math.floor(rand() * 26);
+      const jx = (rand() - 0.5) * cellW * 0.7;
+      const jy = (rand() - 0.5) * cellH * 0.7;
+      const rot = Math.round((rand() - 0.5) * 50);
+      const opacity = 0.35 + rand() * 0.4;
+      const cx = c * cellW + cellW / 2 + jx;
+      const cy = r * cellH + cellH / 2 + jy;
+      items.push(
+        <div
+          key={`${r}-${c}`}
+          style={{
+            position: 'absolute',
+            left: cx - size / 2,
+            top: cy - size / 2,
+            transform: `rotate(${rot}deg)`,
+            opacity,
+          }}
+        >
+          <Icon size={size} color="#4a4a4a" strokeWidth={1.5} />
+        </div>,
+      );
+    }
+  }
+  return <>{items}</>;
+};
+
 const CallBtn: React.FC<{
   cx: number;
   size: number;
@@ -139,7 +197,8 @@ const CallBtn: React.FC<{
 );
 
 export const ZoomLayout: React.FC<ZoomLayoutProps> = ({ speaker1, speaker2, logo }) => (
-  <AbsoluteFill style={{ backgroundColor: '#1e1e21' }}>
+  <AbsoluteFill style={{ backgroundColor: '#000000' }}>
+    <Backdrop />
     <VideoSlot clip={speaker1} x={32} y={160} w={316} h={400} />
     <VideoSlot clip={speaker2} x={372} y={160} w={316} h={400} />
     <ImageSlot clip={logo} x={202} y={584} w={316} h={400} />
@@ -152,7 +211,7 @@ export const ZoomLayout: React.FC<ZoomLayoutProps> = ({ speaker1, speaker2, logo
         top: 1160,
         width: 720,
         height: 120,
-        backgroundColor: '#1e1e21',
+        backgroundColor: '#000000',
       }}
     />
 
